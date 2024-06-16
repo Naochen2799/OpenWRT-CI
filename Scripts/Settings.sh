@@ -26,6 +26,8 @@ else
 	awk -v wrt_repo="$WRT_REPO" -v wrt_date="$WRT_DATE" '{ gsub(/(\(luciversion \|\| \047\047\))/, "& + (\047 / "wrt_repo"-"wrt_date"\047)") } 1' $VER_FILE > temp.js && mv -f temp.js $VER_FILE
 	#修改默认WIFI名
 	sed -i "s/ssid=.*/ssid=$WRT_WIFI/g" ./package/network/config/wifi-scripts/files/lib/wifi/mac80211.sh
+	#修改immortalwrt.lan关联IP
+	sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $(find ./feeds/luci/modules/luci-mod-system/ -type f -name "flash.js")
 fi
 
 #配置文件修改
@@ -39,4 +41,7 @@ else
 	echo "CONFIG_PACKAGE_luci=y" >> ./.config
 	echo "CONFIG_LUCI_LANG_zh_Hans=y" >> ./.config
 	echo "CONFIG_PACKAGE_luci-app-homeproxy=y" >> ./.config
+	if [[ $WRT_TARGET == "Qualcom" ]]; then
+		sed -i "s/CONFIG_PACKAGE_autosamba=y/CONFIG_PACKAGE_autosamba=n/" ./.config
+	fi
 fi
